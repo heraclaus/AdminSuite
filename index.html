@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Changelog & Tutorial Addon</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap');
+
+        /* Tampilan Dasar & Mobile-Friendly (Dark Mode Purple) */
+        :root {
+            --background: #1a1a2e;
+            --surface: #16213e;
+            --primary: #9370db; /* Medium Purple */
+            --primary-hover: #8a2be2; /* Blue Violet */
+            --text-main: #e0e0e0;
+            --text-muted: #b0b0c0;
+            --border: #4a4a68;
+        }
+
+        body {
+            font-family: 'Lato', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: var(--background);
+            color: var(--text-main);
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--surface);
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            border: 1px solid var(--border);
+        }
+        hr { border-color: var(--border); border-style: dashed; }
+
+        /* Tampilan Publik (View Mode) */
+        #addon-title { color: var(--primary); font-weight: 700; margin-bottom: 5px; }
+        #addon-description { color: var(--text-muted); margin-top: 0; margin-bottom: 25px; font-size: 1.1em; }
+        .section-title { border-bottom: 2px solid var(--primary); padding-bottom: 10px; color: var(--primary); font-weight: 700; }
+        
+        /* Bagian Kreator & Sosial Media */
+        .creator-card { display: flex; align-items: center; gap: 15px; margin-bottom: 30px; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px;}
+        .creator-avatar { width: 60px; height: 60px; border-radius: 50%; border: 2px solid var(--primary); object-fit: cover; }
+        .creator-details p { margin: 0; }
+        .creator-name { font-weight: 700; font-size: 1.2em; }
+        .social-links { margin-top: 8px; display: flex; gap: 15px; }
+        .social-links a { color: var(--text-muted); text-decoration: none; font-weight: 700; transition: color 0.2s; }
+        .social-links a:hover { color: var(--primary); }
+
+        .content-container { background: rgba(0, 0, 0, 0.2); padding: 15px; border-radius: 5px; margin-bottom: 30px; border: 1px solid var(--border); }
+        .content-container img { max-width: 100%; height: auto; border-radius: 5px; margin-top: 10px; margin-bottom: 10px; }
+        
+        details { border: 1px solid var(--border); border-radius: 5px; margin-bottom: 10px; overflow: hidden; background: rgba(255, 255, 255, 0.05); }
+        summary { font-weight: 700; padding: 15px; background: rgba(147, 112, 219, 0.2); cursor: pointer; outline: none; transition: background-color 0.2s; }
+        summary:hover { background: rgba(147, 112, 219, 0.4); }
+        .changelog-notes { padding: 15px; }
+        .changelog-notes img { max-width: 100%; height: auto; border-radius: 5px; margin-top: 10px; }
+
+        /* Tampilan Editor (Edit Mode) */
+        #edit-mode { border: 2px dashed var(--primary); padding: 20px; border-radius: 8px; background-color: rgba(0,0,0,0.1); }
+        #edit-mode h2, #edit-mode h3 { color: var(--primary); font-weight: 700; }
+        textarea, input[type="text"] { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid var(--border); border-radius: 4px; box-sizing: border-box; font-size: 1rem; background-color: #2a2a45; color: var(--text-main); font-family: 'Lato', sans-serif; }
+        textarea:focus, input[type="text"]:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 5px var(--primary); }
+        textarea { height: 120px; }
+        #tutorial-editor, #output-code { height: 200px; }
+        #new-changelog, #socials-editor { height: 150px; }
+        button { display: block; width: 100%; padding: 12px; background-color: var(--primary); color: white; border: none; border-radius: 5px; font-size: 1rem; cursor: pointer; margin-top: 10px; transition: background-color 0.2s; font-family: 'Lato', sans-serif; font-weight: 700; }
+        button:hover { background-color: var(--primary-hover); }
+        #generate-code-btn { background-color: #581845; }
+        #generate-code-btn:hover { background-color: #900C3F; }
+        #output-code { background: #0f0f1e; color: #C70039; font-family: 'Courier New', Courier, monospace; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+
+        <div id="view-mode">
+            <h1 id="addon-title"></h1>
+            <p id="addon-description"></p>
+            
+            <div id="creator-section"></div>
+            
+            <h2 class="section-title">📖 Tutorial</h2>
+            <div id="tutorial-content" class="content-container"></div>
+            
+            <h2 class="section-title">🔄 Changelog</h2>
+            <div id="changelog-list"></div>
+        </div>
+
+        <div id="edit-mode" class="hidden">
+            <h2>📝 Mode Editor</h2>
+            
+            <h3>Info Utama</h3>
+            <input type="text" id="title-editor" placeholder="Judul Addon">
+            <textarea id="description-editor" placeholder="Deskripsi singkat addon..."></textarea>
+            
+            <h3>Info Kreator</h3>
+            <input type="text" id="creator-name-editor" placeholder="Nama Kreator">
+            <input type="text" id="creator-avatar-editor" placeholder="URL Foto Profil (misal: dari Imgur, GitHub)">
+            
+            <h3>Sosial Media (Edit dalam format JSON)</h3>
+            <textarea id="socials-editor"></textarea>
+            
+            <hr>
+            
+            <h3>Konten Tutorial</h3>
+            <textarea id="tutorial-editor" placeholder="Tulis atau paste tutorial di sini..."></textarea>
+            
+            <hr>
+            
+            <h3>Tambah Changelog Baru</h3>
+            <input type="text" id="new-version" placeholder="Nomor Versi (contoh: 1.2.0)">
+            <textarea id="new-changelog" placeholder="Tulis catatan perubahan di sini. Gunakan tanda '-' untuk list."></textarea>
+            <button id="add-version-btn">Tambahkan Versi Ini</button>
+            
+            <hr>
+            
+            <h3>Simpan Perubahan</h3>
+            <p style="color: var(--text-muted);">Klik tombol di bawah untuk membuat kode baru. Salin semua isinya dan gantikan seluruh isi dari `const addonData = { ... };` di dalam tag &lt;script&gt;.</p>
+            <button id="generate-code-btn">✅ Buat Kode untuk Disimpan</button>
+            <textarea id="output-code" readonly></textarea>
+        </div>
+
+    </div>
+
+<script>
+// ===================================================================================
+// === BAGIAN DATA: SEMUA KONTEN WEBSITE DISIMPAN DI SINI DALAM FORMAT JAVASCRIPT ===
+// ===================================================================================
+const addonData = {
+  title: "Nama Addon Keren",
+  description: "Ini adalah deskripsi singkat mengenai addon yang kamu buat, jelaskan fungsi utamanya dan untuk siapa addon ini ditujukan.",
+  creator: {
+    name: "Nama Kamu",
+    avatar: "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png",
+    socials: [
+      {
+        "name": "GitHub",
+        "url": "https://github.com"
+      },
+      {
+        "name": "Twitter",
+        "url": "https://twitter.com"
+      }
+    ]
+  },
+  tutorial: `Selamat datang di halaman tutorial!\n\nIni adalah tempat kamu menjelaskan cara menginstal dan menggunakan addon.\n\n![Deskripsi Gambar](https://i.imgur.com/example.png)\n\nPenjelasan lebih lanjut setelah gambar.`,
+  changelogs: [
+    {
+      version: "1.1.0",
+      notes: `- Menambahkan fitur A yang canggih.\n- Memperbaiki bug pada tampilan utama.\n- Optimalisasi performa.`
+    },
+    {
+      version: "1.0.0",
+      notes: `- Rilis awal addon.\n- Fitur dasar X, Y, dan Z.`
+    }
+  ]
+};
+// ===================================================================================
+// === AKHIR BAGIAN DATA                                                           ===
+// ===================================================================================
+
+
+
+// --- BAGIAN LOGIKA (JANGAN DIUBAH KECUALI KAMU PAHAM) ---
+
+document.addEventListener('DOMContentLoaded', function() {
+    
+    // FUNGSI BARU: Untuk mengubah Markdown simpel menjadi HTML
+    function parseMarkdown(text) {
+        // Ganti baris baru menjadi <br>
+        let html = text.replace(/\n/g, '<br>');
+        // Ganti format gambar Markdown ![alt](src) menjadi tag <img>
+        html = html.replace(/!\[(.*?)\]\((.*?)\)/g, '<img src="$2" alt="$1">');
+        return html;
+    }
+
+    function renderViewMode() {
+        document.title = addonData.title;
+        document.getElementById('addon-title').innerText = addonData.title;
+        document.getElementById('addon-description').innerText = addonData.description;
+        
+        // Render creator card
+        const creator = addonData.creator;
+        const creatorSection = document.getElementById('creator-section');
+        let socialLinksHTML = creator.socials.map(social => 
+            `<a href="${social.url}" target="_blank" rel="noopener noreferrer">${social.name}</a>`
+        ).join('');
+        creatorSection.innerHTML = `
+            <div class="creator-card">
+                <img src="${creator.avatar}" alt="Avatar Kreator" class="creator-avatar">
+                <div class="creator-details">
+                    <p class="creator-name">${creator.name}</p>
+                    <div class="social-links">${socialLinksHTML}</div>
+                </div>
+            </div>`;
+
+        // Render tutorial (menggunakan parseMarkdown)
+        document.getElementById('tutorial-content').innerHTML = parseMarkdown(addonData.tutorial);
+        
+        // Render changelogs
+        const changelogContainer = document.getElementById('changelog-list');
+        changelogContainer.innerHTML = '';
+        addonData.changelogs.forEach((log, index) => {
+            const details = document.createElement('details');
+            if (index === 0) details.open = true;
+            
+            const summary = document.createElement('summary');
+            summary.innerText = `Versi ${log.version}`;
+            
+            const notesDiv = document.createElement('div');
+            notesDiv.className = 'changelog-notes';
+            notesDiv.innerHTML = parseMarkdown(log.notes); // (menggunakan parseMarkdown)
+            
+            details.appendChild(summary);
+            details.appendChild(notesDiv);
+            changelogContainer.appendChild(details);
+        });
+    }
+
+    function populateEditMode() {
+        document.getElementById('title-editor').value = addonData.title;
+        document.getElementById('description-editor').value = addonData.description;
+        document.getElementById('creator-name-editor').value = addonData.creator.name;
+        document.getElementById('creator-avatar-editor').value = addonData.creator.avatar;
+        document.getElementById('socials-editor').value = JSON.stringify(addonData.creator.socials, null, 2);
+        document.getElementById('tutorial-editor').value = addonData.tutorial;
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const isEditMode = urlParams.get('mode') === 'edit';
+
+    if (isEditMode) {
+        document.getElementById('view-mode').classList.add('hidden');
+        document.getElementById('edit-mode').classList.remove('hidden');
+        populateEditMode();
+    } else {
+        renderViewMode();
+    }
+
+    document.getElementById('add-version-btn')?.addEventListener('click', function() {
+        const newVersion = document.getElementById('new-version').value.trim();
+        const newNotes = document.getElementById('new-changelog').value.trim();
+        if (!newVersion || !newNotes) {
+            alert('Nomor versi dan catatan tidak boleh kosong!');
+            return;
+        }
+        addonData.changelogs.unshift({ version: newVersion, notes: newNotes });
+        alert(`Versi ${newVersion} berhasil ditambahkan! Jangan lupa klik 'Buat Kode untuk Disimpan'.`);
+        document.getElementById('new-version').value = '';
+        document.getElementById('new-changelog').value = '';
+    });
+
+    document.getElementById('generate-code-btn')?.addEventListener('click', function() {
+        try {
+            const currentData = JSON.parse(JSON.stringify(addonData));
+            currentData.title = document.getElementById('title-editor').value;
+            currentData.description = document.getElementById('description-editor').value;
+            currentData.creator.name = document.getElementById('creator-name-editor').value;
+            currentData.creator.avatar = document.getElementById('creator-avatar-editor').value;
+            currentData.tutorial = document.getElementById('tutorial-editor').value;
+            currentData.creator.socials = JSON.parse(document.getElementById('socials-editor').value);
+            const dataString = JSON.stringify(currentData, null, 2);
+            const outputCode = `const addonData = ${dataString};`;
+            const outputTextarea = document.getElementById('output-code');
+            outputTextarea.value = outputCode;
+            outputTextarea.select();
+            alert('Kode baru sudah dibuat di kotak teks di bawah. Salin semua dan gantikan objek "addonData" lama di file HTML-mu!');
+        } catch (error) {
+            alert('Gagal membuat kode! Cek kembali format JSON di bagian Sosial Media.\n\nError: ' + error.message);
+        }
+    });
+});
+</script>
+
+</body>
+</html>
